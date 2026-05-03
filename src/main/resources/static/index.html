@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Product Manager</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: sans-serif; background: #f5f5f5; color: #222; padding: 2rem; }
+        h1 { margin-bottom: 2rem; }
+        h2 { margin-bottom: 1rem; font-size: 1.1rem; text-transform: uppercase; letter-spacing: .05em; color: #555; }
+        section { background: white; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+
+        form { display: flex; gap: .75rem; flex-wrap: wrap; align-items: flex-end; }
+        label { display: flex; flex-direction: column; gap: .25rem; font-size: .85rem; color: #444; }
+        input { padding: .5rem .75rem; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; width: 180px; }
+        button { padding: .5rem 1.25rem; border: none; border-radius: 6px; font-size: .95rem; cursor: pointer; }
+        .btn-primary { background: #2563eb; color: white; }
+        .btn-primary:hover { background: #1d4ed8; }
+        .btn-sell { background: #16a34a; color: white; font-size: .85rem; padding: .35rem .9rem; }
+        .btn-sell:hover { background: #15803d; }
+        .btn-sell:disabled { background: #ccc; cursor: not-allowed; }
+
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: left; padding: .65rem 1rem; border-bottom: 1px solid #eee; }
+        th { font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; color: #888; }
+        tr:last-child td { border-bottom: none; }
+
+        #message { margin-top: .75rem; font-size: .9rem; color: #dc2626; min-height: 1.2em; }
+    </style>
+</head>
+<body>
+    <h1>Product Manager</h1>
+
+    <section>
+        <h2>Add Product</h2>
+        <form id="createForm">
+            <label>Name <input type="text" name="name" required /></label>
+            <label>Stock <input type="number" name="stockQuantity" min="0" required /></label>
+            <label>Price <input type="number" name="price" min="0" step="0.01" required /></label>
+            <button type="submit" class="btn-primary">Create</button>
+        </form>
+        <div id="message"></div>
+    </section>
+
+    <section>
+        <h2>Products</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Stock</th>
+                    <th>Price</th>
+                    <th>Sold</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="productList"></tbody>
+        </table>
+    </section>
+
+    <script>
+        const msg = document.getElementById('message');
+
+        async function loadProducts() {
+            const res = await fetch('/products');
+            const products = await res.json();
+            const tbody = document.getElementById('productList');
+            tbody.innerHTML = products.map(p => `
+                <tr id="row-${p.id}">
+                    <td>${p.name}</td>
+                    <td>${p.stockQuantity}</td>
+                    <td>$${p.price.toFixed(2)}</td>
+                    <td>${p.amountSold}</td>
+                    <td><button class="btn-sell" onclick="sell('${p.id}')" ${p.stockQuantity === 0 ? 'disabled' : ''}>Sell 1</button></td>
+                </tr>
+            `).join('');
+        }
+
+        document.getElementById('createForm').addEventListener('submit', async e => {
+            e.preventDefault();
+            msg.textContent = '';
+            const data = Object.fromEntries(new FormData(e.target));
+            data.stockQuantity = parseInt(data.stockQuantity);
+            data.price = parseFloat(data.price);
+            data.amountSold = 0;
+
+            const res = await fetch('/products', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (res.ok) {
+                e.target.reset();
+                loadProducts();
+            } else {
+                msg.textContent = 'Failed to create product.';
+            }
+        });
+
+        async function sell(id) {
+            const res = await fetch(`/products/${id}/sell`, { method: 'POST' });
+            if (res.ok) {
+                loadProducts();
+            } else if (res.status === 400) {
+                alert('Out of stock.');
+            }
+        }
+
+        loadProducts();
+    </script>
+</body>
+</html>
