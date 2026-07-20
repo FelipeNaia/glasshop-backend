@@ -41,6 +41,19 @@ public class ImageController {
         }
     }
 
+    @DeleteMapping("/products/{productId}/{imageId}")
+    public ResponseEntity<Product> deleteImage(
+            @PathVariable String productId,
+            @PathVariable String imageId) {
+        try {
+            return ResponseEntity.ok(imageService.deleteImage(productId, imageId));
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
     @GetMapping("/{imageId}")
     public ResponseEntity<Resource> getImage(@PathVariable String imageId) {
         try {

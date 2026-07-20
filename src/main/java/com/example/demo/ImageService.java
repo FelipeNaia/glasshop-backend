@@ -60,6 +60,17 @@ public class ImageService {
         return productRepository.save(product);
     }
 
+    public Product deleteImage(String productId, String imageId) throws IOException {
+        Product product = productRepository.findById(productId)
+            .orElseThrow(() -> new NoSuchElementException("Product not found: " + productId));
+
+        boolean removed = product.getImages().removeIf(img -> img.getId().equals(imageId));
+        if (!removed) throw new NoSuchElementException("Image not found: " + imageId);
+
+        storageService.delete(imageId);
+        return productRepository.save(product);
+    }
+
     public ResponseEntity<Resource> getImage(String imageId) throws IOException {
         Resource resource = storageService.load(imageId);
         String contentType = storageService.detectContentType(imageId);

@@ -55,6 +55,11 @@ public class ImageStorageService {
         return probed != null ? probed : "application/octet-stream";
     }
 
+    public void delete(String imageId) throws IOException {
+        Path file = findFile(imageId);
+        if (file != null) Files.deleteIfExists(file);
+    }
+
     private Path findFile(String imageId) throws IOException {
         if (!Files.exists(uploadDir)) return null;
         try (Stream<Path> files = Files.list(uploadDir)) {
