@@ -10,3 +10,4 @@ target/
 *.ipr
 .DS_Store
 uploads/
+.claude/settings.local.json
