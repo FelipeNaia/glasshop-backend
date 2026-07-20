@@ -70,3 +70,35 @@
 7. **`ProductService`** — paginated query with tag and visibility filters; sort images by priority on read.
 8. **`ProductController`** — paginated GET with filters; PATCH visibility toggle.
 9. **Tests** — image sort order, reorder logic, pagination filters, visibility toggle.
+
+---
+
+# Plan: Users, Auth, Cart & Checkout
+
+Full detail, data models, endpoint tables, and per-item progress checkboxes live in
+`ai-development/` — that's the source of truth for what's implemented vs. outstanding.
+This section is just a map of the three tickets and how they relate.
+
+## Goals
+
+- Two user roles: `BUYER` (self-registers, builds a cart, checks out) and `ADMIN`
+  (manages the product catalog — creates products, changes prices, uploads photos).
+- Stateless JWT authentication (access token + revocable refresh token).
+- Persistent per-user shopping cart.
+- Checkout via Abacate Pay (PIX) — asynchronous, webhook-confirmed payment.
+
+## Tickets
+
+| Ticket | File | Depends on |
+|--------|------|------------|
+| Authentication & Authorization | [`ai-development/authentication.md`](ai-development/authentication.md) | — |
+| Shopping Cart | [`ai-development/shopping-cart.md`](ai-development/shopping-cart.md) | Authentication |
+| Checkout & Payment (Abacate Pay) | [`ai-development/payment.md`](ai-development/payment.md) | Authentication, Shopping Cart |
+
+## Notes
+- Existing `ProductController`/`ImageController` write endpoints (create/update product,
+  upload/reorder/delete images) become `ADMIN`-only as part of the Authentication ticket;
+  read endpoints stay public.
+- Explicitly deferred for v1 (see individual tickets for details): forgot/reset password,
+  email verification, login rate limiting, stock reservation/oversell protection, refunds,
+  abandoned-order cleanup.
