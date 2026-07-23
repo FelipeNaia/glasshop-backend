@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,6 +19,7 @@ public class ImageController {
     private final ImageService imageService;
 
     @PostMapping("/products/{productId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Product> uploadImage(
             @PathVariable String productId,
             @RequestParam("file") MultipartFile file) {
@@ -31,6 +33,7 @@ public class ImageController {
     }
 
     @PutMapping("/products/{productId}/reorder")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Product> reorderImages(
             @PathVariable String productId,
             @RequestBody ReorderImagesRequest request) {
@@ -42,6 +45,7 @@ public class ImageController {
     }
 
     @DeleteMapping("/products/{productId}/{imageId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Product> deleteImage(
             @PathVariable String productId,
             @PathVariable String imageId) {

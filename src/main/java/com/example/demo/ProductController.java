@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,11 +35,13 @@ public class ProductController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Product> create(@RequestBody Product product) {
         return ResponseEntity.status(HttpStatus.CREATED).body(repository.save(product));
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Product> update(@PathVariable String id, @RequestBody Product updated) {
         return repository.findById(id).map(existing -> {
             existing.setName(updated.getName());
@@ -52,6 +55,7 @@ public class ProductController {
     }
 
     @PostMapping("/{id}/sell")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Product> sell(@PathVariable String id) {
         return repository.findById(id).map(product -> {
             if (product.getStockQuantity() <= 0) {
@@ -64,6 +68,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable String id) {
         if (!repository.existsById(id)) {
             return ResponseEntity.notFound().build();
@@ -73,6 +78,7 @@ public class ProductController {
     }
 
     @PatchMapping("/{id}/visibility")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Product> toggleVisibility(@PathVariable String id) {
         try {
             return ResponseEntity.ok(productService.toggleVisibility(id));

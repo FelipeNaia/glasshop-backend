@@ -37,7 +37,7 @@ promote other users afterwards.
 | `POST` | `/api/auth/logout` | authenticated | Revokes the caller's refresh token. |
 
 ## Admin creation (out-of-band, not an HTTP endpoint)
-- First admin: seeded on startup via a `CommandLineRunner` reading `ADMIN_SEED_EMAIL` / `ADMIN_SEED_PASSWORD` env vars — only runs if no user with `ADMIN` role exists yet.
+- First admin: no seeding code — created/promoted directly in MongoDB by hand (e.g. set `role: "ADMIN"` on a document in the `users` collection after registering normally as a `BUYER`).
 - Further admins: an authenticated `ADMIN` calls a role-management endpoint (e.g. `PATCH /api/users/{id}/role`) to promote another existing user. This endpoint itself must be `@PreAuthorize("hasRole('ADMIN')")`.
 
 ---
@@ -60,20 +60,20 @@ promote other users afterwards.
 
 ## Checklist
 
-- [ ] Add `spring-boot-starter-security` and JWT library dependency to `pom.xml`
-- [ ] `User` document + `UserRepository`
-- [ ] `RefreshToken` document + `RefreshTokenRepository`
-- [ ] `PasswordEncoder` bean (BCrypt)
-- [ ] JWT utility class: generate/parse/validate access tokens, generate/hash refresh tokens
-- [ ] `JwtAuthenticationFilter`
-- [ ] `SecurityFilterChain` config (public vs authenticated routes, stateless sessions, CSRF disabled)
-- [ ] Custom 401/403 JSON error handlers
-- [ ] `@EnableMethodSecurity` enabled
-- [ ] `AuthController`: `POST /api/auth/register`
-- [ ] `AuthController`: `POST /api/auth/login`
-- [ ] `AuthController`: `POST /api/auth/refresh` (with rotation)
-- [ ] `AuthController`: `POST /api/auth/logout`
-- [ ] Admin seed `CommandLineRunner` (env-var driven, only runs if no admin exists)
-- [ ] `PATCH /api/users/{id}/role` promote-to-admin endpoint (`ADMIN`-only)
-- [ ] Lock down `ProductController`/`ImageController` write endpoints to `ADMIN`
-- [ ] Tests: register/login happy path, bad credentials, expired/invalid token rejected, refresh rotation, role-gated endpoint rejects `BUYER`
+- [x] Add `spring-boot-starter-security` and JWT library dependency to `pom.xml`
+- [x] `User` document + `UserRepository`
+- [x] `RefreshToken` document + `RefreshTokenRepository`
+- [x] `PasswordEncoder` bean (BCrypt)
+- [x] JWT utility class: generate/parse/validate access tokens, generate/hash refresh tokens
+- [x] `JwtAuthenticationFilter`
+- [x] `SecurityFilterChain` config (public vs authenticated routes, stateless sessions, CSRF disabled)
+- [x] Custom 401/403 JSON error handlers
+- [x] `@EnableMethodSecurity` enabled
+- [x] `AuthController`: `POST /api/auth/register`
+- [x] `AuthController`: `POST /api/auth/login`
+- [x] `AuthController`: `POST /api/auth/refresh` (with rotation)
+- [x] `AuthController`: `POST /api/auth/logout`
+- [ ] ~~Admin seed `CommandLineRunner`~~ — dropped; first admin is set manually in MongoDB instead
+- [x] `PATCH /api/users/{id}/role` promote-to-admin endpoint (`ADMIN`-only)
+- [x] Lock down `ProductController`/`ImageController` write endpoints to `ADMIN`
+- [x] Tests: register/login happy path, bad credentials, expired/invalid token rejected, refresh rotation, role-gated endpoint rejects `BUYER`
